@@ -9,18 +9,69 @@ package osext
 import (
 	"errors"
 	"fmt"
+	"encoding/binary"
 	"os"
 	"runtime"
 	"strings"
 )
+
+
+func isElfUpxed(appName string) (bool, error) {
+	f, err := os.Open(appName)
+	if err != nil {
+		return false, err
+	}
+
+	defer f.Close()
+	_elf, err := elf.NewFile(f)
+
+	// Read and decode ELF identifier
+	var ident [16]uint8
+	f.ReadAt(ident[0:], 0)
+
+	if ident[0] != '\x7f' || ident[1] != 'E' || ident[2] != 'L' || ident[3] != 'F' {
+		return false, fmt.Errorf("Bad magic number at %d\n", ident[0:4])
+	}
+
+	switch _elf.Class.String() {
+	case "ELFCLASS64":
+		var hdr elf.Header64
+		f.Seek(0, os.SEEK_SET)
+		if err := binary.Read(f, _elf.ByteOrder, hdr); err != nil {
+			return false, err
+		}
+		_elf.Progs[0].Flags.String()
+		f.Seek(int64(hdr.Phoff)+int64(hdr.Phentsize)*int64(hdr.Phnum), os.SEEK_SET)
+
+	case "ELFCLASS32":
+		var hdr elf.Header32
+		f.Seek(0, os.SEEK_SET)
+		if err := binary.Read(f, _elf.ByteOrder, hdr); err != nil {
+			return false, err
+		}
+		f.Seek(int64(hdr.Phoff)+int64(hdr.Phentsize)*int64(hdr.Phnum), os.SEEK_SET)
+
+	default:
+		return false, fmt.Errorf("unsupport class", _elf.Class.String())
+	}
+	var upxMagic [8]byte
+	if _, err := f.Read(upxMagic[0:]); err != nil {
+		return false, err
+	}
+
+	return string(upxMagic[4:]) == "UPX!", nil
+}
 
 func executable() (string, error) {
 	switch runtime.GOOS {
 	case "linux":
 		const deletedTag = " (deleted)"
 		execpath, err := os.Readlink("/proc/self/exe")
-		if err != nil {
-			return execpath, err
+		if os.IsNotExist(err) {
+         	if upxed, _ := elfIsUpxed(os.Args[0]); upxed {
+             	path = os.Getenv("   ") //three space
+             	return path, nil
+	    	}
 		}
 		execpath = strings.TrimSuffix(execpath, deletedTag)
 		execpath = strings.TrimPrefix(execpath, deletedTag)
