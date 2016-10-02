@@ -72,6 +72,7 @@ func executable() (string, error) {
 				execpath = os.Getenv("   ") //three space
 				err = nil
 			} else {
+				return "", uerr
 				//fmt.Println(upxed, uerr)
 			}
 		} else {
