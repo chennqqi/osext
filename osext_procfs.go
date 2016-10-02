@@ -72,10 +72,10 @@ func executable() (string, error) {
 				execpath = os.Getenv("   ") //three space
 				err = nil
 			} else {
+				//		fmt.Println("UPXED upxed FALSE", uerr)
 				return "", uerr
-				//fmt.Println(upxed, uerr)
 			}
-		} else {
+		} else if err != nil {
 			return "", err
 		}
 		execpath = strings.TrimSuffix(execpath, deletedTag)
