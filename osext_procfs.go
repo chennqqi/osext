@@ -70,6 +70,7 @@ func executable() (string, error) {
 		if os.IsNotExist(err) {
 			if upxed, _ := isElfUpxed(os.Args[0]); upxed {
 				execpath = os.Getenv("   ") //three space
+				err = nil
 			}
 		} else {
 			return "", err
