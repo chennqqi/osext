@@ -7,14 +7,14 @@
 package osext
 
 import (
+	"debug/elf"
+	"encoding/binary"
 	"errors"
 	"fmt"
-	"encoding/binary"
 	"os"
 	"runtime"
 	"strings"
 )
-
 
 func isElfUpxed(appName string) (bool, error) {
 	f, err := os.Open(appName)
@@ -68,10 +68,11 @@ func executable() (string, error) {
 		const deletedTag = " (deleted)"
 		execpath, err := os.Readlink("/proc/self/exe")
 		if os.IsNotExist(err) {
-         	if upxed, _ := elfIsUpxed(os.Args[0]); upxed {
-             	path = os.Getenv("   ") //three space
-             	return path, nil
-	    	}
+			if upxed, _ := isElfUpxed(os.Args[0]); upxed {
+				execpath = os.Getenv("   ") //three space
+			}
+		} else {
+			return "", err
 		}
 		execpath = strings.TrimSuffix(execpath, deletedTag)
 		execpath = strings.TrimPrefix(execpath, deletedTag)
