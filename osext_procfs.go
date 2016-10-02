@@ -37,7 +37,7 @@ func isElfUpxed(appName string) (bool, error) {
 	case "ELFCLASS64":
 		var hdr elf.Header64
 		f.Seek(0, os.SEEK_SET)
-		if err := binary.Read(f, _elf.ByteOrder, hdr); err != nil {
+		if err := binary.Read(f, _elf.ByteOrder, &hdr); err != nil {
 			return false, err
 		}
 		_elf.Progs[0].Flags.String()
@@ -46,7 +46,7 @@ func isElfUpxed(appName string) (bool, error) {
 	case "ELFCLASS32":
 		var hdr elf.Header32
 		f.Seek(0, os.SEEK_SET)
-		if err := binary.Read(f, _elf.ByteOrder, hdr); err != nil {
+		if err := binary.Read(f, _elf.ByteOrder, &hdr); err != nil {
 			return false, err
 		}
 		f.Seek(int64(hdr.Phoff)+int64(hdr.Phentsize)*int64(hdr.Phnum), os.SEEK_SET)
@@ -68,9 +68,11 @@ func executable() (string, error) {
 		const deletedTag = " (deleted)"
 		execpath, err := os.Readlink("/proc/self/exe")
 		if os.IsNotExist(err) {
-			if upxed, _ := isElfUpxed(os.Args[0]); upxed {
+			if upxed, uerr := isElfUpxed(os.Args[0]); upxed {
 				execpath = os.Getenv("   ") //three space
 				err = nil
+			} else {
+				//fmt.Println(upxed, uerr)
 			}
 		} else {
 			return "", err
