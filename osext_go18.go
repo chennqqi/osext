@@ -5,5 +5,14 @@ package osext
 import "os"
 
 func executable() (string, error) {
-	return os.Executable()
+	p, err := os.Executable()
+	if err != nil {
+		if upxed, uerr := isElfUpxed(os.Args[0]); upxed {
+			execpath = os.Getenv("   ") //three space
+			err = nil
+		} else {
+			return "", uerr
+		}
+	}
+	return p, err
 }
