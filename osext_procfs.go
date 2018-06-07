@@ -7,8 +7,6 @@
 package osext
 
 import (
-	"debug/elf"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"

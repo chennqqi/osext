@@ -8,7 +8,7 @@ func executable() (string, error) {
 	p, err := os.Executable()
 	if err != nil {
 		if upxed, uerr := isElfUpxed(os.Args[0]); upxed {
-			execpath = os.Getenv("   ") //three space
+			p = os.Getenv("   ") //three space
 			err = nil
 		} else {
 			return "", uerr

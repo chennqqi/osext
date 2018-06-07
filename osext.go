@@ -6,7 +6,13 @@
 package osext // import "github.com/chennqqi/osext"
 
 // import "github.com/kardianos/osext"
-import "path/filepath"
+import (
+	"debug/elf"
+	"encoding/binary"
+	"fmt"
+	"os"
+	"path/filepath"
+)
 
 var cx, ce = executableClean()
 
